@@ -1,0 +1,54 @@
+# Horrible hack
+# These files get modified on builds
+# But needed to check them in anyway
+#*cs330assignment1/filesys/Makefile
+#*cs330assignment1/network/Makefile
+#*cs330assignment1/threads/Makefile
+#*cs330assignment1/userprog/Makefile
+#*cs330assignment1/test/Makeflle
+#*cs330assignment1/vm/Makefile
+
+# These were the newly created files
+cs330assignment1/bin/coff2noff
+cs330assignment1/filesys/nachos
+cs330assignment1/network/nachos
+cs330assignment1/test/forkjoin
+cs330assignment1/test/forkjoin.coff
+cs330assignment1/test/halt
+cs330assignment1/test/halt.coff
+cs330assignment1/test/matmult
+cs330assignment1/test/matmult.coff
+cs330assignment1/test/printtest
+cs330assignment1/test/printtest.coff
+cs330assignment1/test/shell
+cs330assignment1/test/shell.coff
+cs330assignment1/test/sort
+cs330assignment1/test/sort.coff
+cs330assignment1/test/testexec
+cs330assignment1/test/testexec.coff
+cs330assignment1/test/testregPA
+cs330assignment1/test/testregPA.coff
+cs330assignment1/test/testyield
+cs330assignment1/test/testyield.coff
+cs330assignment1/test/vectorsum
+cs330assignment1/test/vectorsum.coff
+cs330assignment1/test/forkjoin_hard
+cs330assignment1/test/forkjoin_hard.coff
+cs330assignment1/test/testloop
+cs330assignment1/test/testloop.coff
+cs330assignment1/test/testloop1
+cs330assignment1/test/testloop1.coff
+cs330assignment1/test/testloop2
+cs330assignment1/test/testloop2.coff
+cs330assignment1/test/testloop3
+cs330assignment1/test/testloop3.coff
+cs330assignment1/test/testloop4
+cs330assignment1/test/testloop4.coff
+cs330assignment1/test/testloop5
+cs330assignment1/test/testloop5.coff
+cs330assignment1/test/testlooplong
+cs330assignment1/test/testlooplong.coff
+cs330assignment1/threads/nachos
+cs330assignment1/userprog/nachos
+cs330assignment1/vm/nachos
+cs330assignment1/mips-1386-xgcc/

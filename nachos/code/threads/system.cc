@@ -62,12 +62,13 @@ extern void Cleanup();
 static void
 TimerInterruptHandler(int dummy)
 {
+    NachOSThread *ready_threads;
     if (interrupt->getStatus() != IdleMode)
 	interrupt->YieldOnReturn();
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
     // traverse the list and add all to the queue
-    while(listOfSleepNodes->first->key <= stats->totalTicks && !listOfSleepNodes.isEmpty()){
-        (NachOSThread *) ready_threads= listOfSleepNodes->Remove();
+    while(listOfSleepNodes->first->key <= stats->totalTicks && !listOfSleepNodes->IsEmpty()){
+         ready_threads= (NachOSThread *)listOfSleepNodes->Remove();
         scheduler->MoveThreadToReadyQueue(ready_threads);
     }
     (void) interrupt->SetLevel(oldLevel);

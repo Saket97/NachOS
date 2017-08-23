@@ -28,6 +28,7 @@ extern ProcessScheduler *scheduler;			// the thread scheduler
 extern Interrupt *interrupt;			// interrupt status
 extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
+extern List *listOfSleepNodes;
 typedef struct sleep_node {
 	NachOSThread *thread;
 	int wakeup_time;
