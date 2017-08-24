@@ -267,8 +267,8 @@ ExceptionHandler(ExceptionType which)
         // newThread->userRegisters[PCReg] = currentThread->userRegisters[PCReg];
         // newThread->userRegisters[NextPCReg] = currentThread->userRegisters[NextPCReg];
         newThread->ThreadFork(foo, 0);
-    } else if((which = Syscall_Exception) && (type == SysCall_Exec)){
-        char *filename;
+    } else if((which = SyscallException) && (type == SysCall_Exec)){
+        char *filename = new char[50];
         vaddr = machine->ReadRegister(4);
         int i = 0;
         machine->ReadMem(vaddr, 1, &memval);

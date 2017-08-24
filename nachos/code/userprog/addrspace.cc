@@ -113,7 +113,7 @@ ProcessAddressSpace::ProcessAddressSpace(OpenFile *executable)
     if (noffH.initData.size > 0) {
         DEBUG('a', "Initializing data segment, at 0x%x, size %d\n",
 			noffH.initData.virtualAddr, noffH.initData.size);
-        executable->ReadAt(&((offset*Pagesize + machine->mainMemory)[noffH.initData.virtualAddr]),
+        executable->ReadAt(&((offset*PageSize + machine->mainMemory)[noffH.initData.virtualAddr]),
 			noffH.initData.size, noffH.initData.inFileAddr);
     }
     offset += numVirtualPages;
