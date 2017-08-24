@@ -231,27 +231,33 @@ ExceptionHandler(ExceptionType which)
         machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
         machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
     } else if ((which == SyscallException) && (type == SysCall_Exit)){
-	int exitcode = machine->ReadRegister(4);
-	Log *log = (Log *)threadLog->SortedRemove(&(currentThread->pid));
-        log->exitCode = exitcode;
-	log->exitCalled = 1;
-	threadLog->SortedInsert((void *)log, currentThread->pid);
-	ListElement *ptr = listOfSleepNodes->first;
-	ListElement *prev = listOfSleepNodes->first;
-	IntStatus oldLevel = interrupt->SetLevel(IntOff);
-	while (ptr != NULL){
-		NachOSThread *thread= (NachOSThread *)ptr->item;
-		if(thread->pid == currentThread->ppid && ptr->key < 0){
-			prev->next = ptr->next;
-			delete ptr;
-			scheduler->MoveThreadToReadyQueue(thread);
-			break;
-		}
-		prev = ptr;
-		if(ptr != NULL)
-			ptr = ptr->next;
-	}
-	(void) interrupt->SetLevel(oldLevel);
+	    int exitcode = machine->ReadRegister(4);
+	    Log *log = (Log *)threadLog->SortedRemove(&(currentThread->pid));
+        if (log != NULL){
+            log->exitCode = exitcode;
+	        log->exitCalled = 1;
+	        threadLog->SortedInsert((void *)log, currentThread->pid);
+        }
+        else
+        {
+            printf("EXIT Called... LOG is NULL\n");
+        }
+	    ListElement *ptr = listOfSleepNodes->first;
+	    ListElement *prev = listOfSleepNodes->first;
+	    IntStatus oldLevel = interrupt->SetLevel(IntOff);
+	    while (ptr != NULL){
+	    	NachOSThread *thread= (NachOSThread *)ptr->item;
+	    	if(thread->pid == currentThread->ppid && ptr->key < 0){
+	    		prev->next = ptr->next;
+	    		delete ptr;
+	    		scheduler->MoveThreadToReadyQueue(thread);
+	    		break;
+	    	}
+	    	prev = ptr;
+	    	if(ptr != NULL)
+	    		ptr = ptr->next;
+	    }
+	    (void) interrupt->SetLevel(oldLevel);
     } else if ((which == SyscallException) && (type == SysCall_Join)) {
 	    int childPid = machine->ReadRegister(4);
 	    int FLAG = 0;
