@@ -56,18 +56,20 @@ static void WriteDone(int arg) { writeDone->V(); }
 
 void func (int arg)
 {
+    printf("Thread foo %s\n",currentThread->getName());
+
     if (threadToBeDestroyed != NULL) {
         delete threadToBeDestroyed;
     threadToBeDestroyed = NULL;
     }
-
-#ifdef USER_PROGRAM
+    printf("threadToBeDestroyed completed %s\n",currentThread->getName());
     if (currentThread->space != NULL) {     // if there is an address space
         currentThread->RestoreUserState();     // to restore, do it.
     currentThread->space->RestoreContextOnSwitch();
     }
-#endif
+    printf("User State Restored %s\n",currentThread->getName());
     machine->Run();
+    printf("Completed machine run%s\n", currentThread->getName());
 }
 static void ConvertIntToHex (unsigned v, Console *console)
 {
@@ -228,14 +230,30 @@ ExceptionHandler(ExceptionType which)
         machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
     }else if ((which == SyscallException) && (type == SysCall_Fork)){
 
+        // Update the PC of child and parent
+        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+
         NachOSThread *newThread = new NachOSThread("newThread");
         ProcessAddressSpace* new_space = new ProcessAddressSpace();
         new_space->setAllParameters(currentThread->space->numVirtualPages);
         newThread->space = new_space;
-        for(int ptr_for_phy_addr = 0; ptr_for_phy_addr < currentThread->space->numVirtualPages; ptr_for_phy_addr++){
-            for (int vaddr = 0; vaddr < PageSize; vaddr++)
-                machine->mainMemory[(new_space->KernelPageTable[ptr_for_phy_addr].physicalPage)*PageSize+vaddr] = machine->mainMemory[(currentThread->space->KernelPageTable[ptr_for_phy_addr].physicalPage)*PageSize+vaddr];
+        int parentstart = (currentThread->space->KernelPageTable[0].physicalPage)*PageSize;
+        int childstart = (new_space->KernelPageTable[0].physicalPage)*PageSize;
+        int s = currentThread->space->numVirtualPages*PageSize;
+        int i = parentstart;
+        printf("chlildstart:%d parentstart:%d numVirtualPages:%d PageSize:%d \n", childstart, parentstart, currentThread->space->numVirtualPages, PageSize);
+        for (int j = childstart; j < childstart+s; ++j)
+        {
+            machine->mainMemory[j] = machine->mainMemory[i];
+            i++;
         }
+        /*
+        for(int page = 0; page < currentThread->space->numVirtualPages; page++){
+            for (int vaddr = 0; vaddr < PageSize; vaddr++)
+                machine->mainMemory[(new_space->KernelPageTable[page].physicalPage)*PageSize+vaddr] = machine->mainMemory[(currentThread->space->KernelPageTable[page].physicalPage)*PageSize+vaddr];
+        }*/
         machine->WriteRegister(2, 0);
         newThread->SaveUserState();
         machine->WriteRegister(2, newThread->pid);
@@ -243,13 +261,9 @@ ExceptionHandler(ExceptionType which)
         void (*foo)(int);
         foo = &func;
 
-        // Update the PC of child and parent
-        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
-        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
-        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
-        newThread->userRegisters[PrevPCReg] = currentThread->userRegisters[PrevPCReg];
-        newThread->userRegisters[PCReg] = currentThread->userRegisters[PCReg];
-        newThread->userRegisters[NextPCReg] = currentThread->userRegisters[NextPCReg];
+        // newThread->userRegisters[PrevPCReg] = currentThread->userRegisters[PrevPCReg];
+        // newThread->userRegisters[PCReg] = currentThread->userRegisters[PCReg];
+        // newThread->userRegisters[NextPCReg] = currentThread->userRegisters[NextPCReg];
         newThread->ThreadFork(foo, 0);
     }
     else
