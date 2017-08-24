@@ -1,3 +1,4 @@
+
 // addrspace.cc 
 //	Routines to manage address spaces (executing user programs).
 //
@@ -26,6 +27,8 @@
 //	object file header, in case the file was generated on a little
 //	endian machine, and we're now running on a big endian machine.
 //----------------------------------------------------------------------
+
+
 
 static void 
 SwapHeader (NoffHeader *noffH)
@@ -56,6 +59,8 @@ SwapHeader (NoffHeader *noffH)
 //
 //	"executable" is the file containing the object code to load into memory
 //----------------------------------------------------------------------
+
+int ProcessAddressSpace::offset = 0; // The offset to deal with the kernel page table
 
 ProcessAddressSpace::ProcessAddressSpace(OpenFile *executable)
 {
@@ -114,6 +119,67 @@ ProcessAddressSpace::ProcessAddressSpace(OpenFile *executable)
     }
 
 }
+
+
+ProcessAddressSpace::ProcessAddressSpace()
+{
+    /*NoffHeader noffH;
+    unsigned int i, size;
+
+    executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
+    if ((noffH.noffMagic != NOFFMAGIC) && 
+        (WordToHost(noffH.noffMagic) == NOFFMAGIC))
+        SwapHeader(&noffH);
+    ASSERT(noffH.noffMagic == NOFFMAGIC);
+
+// how big is address space?
+    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
+            + UserStackSize;    // we need to increase the size
+                        // to leave room for the stack
+    numVirtualPages = divRoundUp(size, PageSize);
+    size = numVirtualPages * PageSize;*/
+
+    //ASSERT(numVirtualPages <= NumPhysPages);        // check we're not trying
+                        // to run anything too big --
+                        // at least until we have
+                        // virtual memory
+
+    DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
+                    numVirtualPages, size);
+// first, set up the translation 
+    KernelPageTable = new TranslationEntry[numVirtualPages];
+    for (i = 0; i < numVirtualPages; i++) {
+    KernelPageTable[i].virtualPage = i; // for now, virtual page # = phys page #
+    KernelPageTable[i].physicalPage = i + offset;
+    KernelPageTable[i].valid = TRUE;
+    KernelPageTable[i].use = FALSE;
+    KernelPageTable[i].dirty = FALSE;
+    KernelPageTable[i].readOnly = FALSE;  // if the code segment was entirely on 
+                    // a separate page, we could set its 
+                    // pages to be read-only
+    }
+    
+// zero out the entire address space, to zero the unitialized data segment 
+// and the stack segment
+    //bzero(machine->mainMemory, size);
+
+// then, copy in the code and data segments into memory
+    /*if (noffH.code.size > 0) {
+        DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
+            noffH.code.virtualAddr, noffH.code.size);
+        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
+            noffH.code.size, noffH.code.inFileAddr);
+    }
+    if (noffH.initData.size > 0) {
+        DEBUG('a', "Initializing data segment, at 0x%x, size %d\n", 
+            noffH.initData.virtualAddr, noffH.initData.size);
+        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
+            noffH.initData.size, noffH.initData.inFileAddr);
+    }*/
+
+}
+
+
 
 //----------------------------------------------------------------------
 // ProcessAddressSpace::~ProcessAddressSpace
