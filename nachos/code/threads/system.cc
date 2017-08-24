@@ -19,7 +19,7 @@ Statistics *stats;			// performance metrics
 Timer *timer;				// the hardware timer device,
 					// for invoking context switches
 List *listOfSleepNodes;
-
+List *threadLog;
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
 #endif
@@ -67,7 +67,7 @@ TimerInterruptHandler(int dummy)
 	interrupt->YieldOnReturn();
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
     // traverse the list and add all to the queue
-    while(listOfSleepNodes->first->key <= stats->totalTicks && !listOfSleepNodes->IsEmpty() && listOfSleepNodes->first->key > 0){
+    while(!listOfSleepNodes->IsEmpty() && listOfSleepNodes->first->key > 0 && listOfSleepNodes->first->key <= stats->totalTicks){
          ready_threads= (NachOSThread *)listOfSleepNodes->Remove();
         scheduler->MoveThreadToReadyQueue(ready_threads);
     }
@@ -157,6 +157,7 @@ Initialize(int argc, char **argv)
     currentThread->setStatus(RUNNING);
 
     listOfSleepNodes =  new List;
+    threadLog = new List;
 
     interrupt->Enable();
     CallOnUserAbort(Cleanup);			// if user hits ctl-C
