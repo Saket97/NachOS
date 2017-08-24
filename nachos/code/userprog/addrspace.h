@@ -1,5 +1,5 @@
-// addrspace.h 
-//	Data structures to keep track of executing user programs 
+// addrspace.h
+//	Data structures to keep track of executing user programs
 //	(address spaces).
 //
 //	For now, we don't keep any information about address spaces.
@@ -7,7 +7,7 @@
 //	executing the user program (see thread.h).
 //
 // Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
+// All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
 
 #ifndef ADDRSPACE_H
@@ -23,19 +23,23 @@ class ProcessAddressSpace {
     ProcessAddressSpace(OpenFile *executable);	// Create an address space,
 					// initializing it with the program
 					// stored in the file "executable"
+    ProcessAddressSpace();     // De-allocate an address space
+
     ~ProcessAddressSpace();			// De-allocate an address space
 
     void InitUserModeCPURegisters();		// Initialize user-level CPU registers,
 					// before jumping to user code
 
     void SaveContextOnSwitch();			// Save/restore address space-specific
-    void RestoreContextOnSwitch();		// info on a context switch 
+    void RestoreContextOnSwitch();		// info on a context switch
 
-  private:
+  public:
     TranslationEntry *KernelPageTable;	// Assume linear page table translation
 					// for now!
-    unsigned int numVirtualPages;		// Number of pages in the virtual 
+    unsigned int numVirtualPages;		// Number of pages in the virtual
 					// address space
+    void setAllParameters(int npages);
+    static int offset;
 };
 
 #endif // ADDRSPACE_H

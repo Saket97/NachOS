@@ -29,12 +29,7 @@ extern Interrupt *interrupt;			// interrupt status
 extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 extern List *listOfSleepNodes;
-extern List *threadLog;		//log of all threads that were once executed 
-typedef struct sleep_node {
-	NachOSThread *thread;
-	int wakeup_time;
-}sleep_node;
-extern List *threadLog;
+
 extern bool initializedConsoleSemaphores;       // Used to initialize the semaphores for console I/O exactly once
 
 #ifdef USER_PROGRAM
