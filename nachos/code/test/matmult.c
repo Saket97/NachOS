@@ -33,6 +33,6 @@ main()
 	for (j = 0; j < Dim; j++)
             for (k = 0; k < Dim; k++)
 		 C[i][j] += A[i][k] * B[k][j];
-
+    syscall_wrapper_PrintInt(C[Dim-1][Dim-1]);
     syscall_wrapper_Exit(C[Dim-1][Dim-1]);		/* and then we're done */
 }

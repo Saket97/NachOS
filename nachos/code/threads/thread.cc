@@ -42,7 +42,7 @@ NachOSThread::NachOSThread(char* threadName)
     if (currentThread != NULL){
         ppid = currentThread->pid;
         addNode(&(currentThread->child), pid);
-        Log *log;
+        Log *log = new Log;
         log->threadId = pid;
         log->exitCalled = 0;
         log->exitCode = NULL;
