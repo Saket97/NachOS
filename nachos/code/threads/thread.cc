@@ -40,8 +40,13 @@ NachOSThread::NachOSThread(char* threadName)
     status = JUST_CREATED;
     pid = count;
     count++;
-    ppid = currentThread->pid;
-    addNode(&(currentThread->child), pid);
+    if(currentThread != NULL){
+        ppid = currentThread->pid;
+        addNode(&(currentThread->child), pid);
+    }
+    else{
+        // TODO: Handle the case when currentThread is null (if necessary, which it may not be)
+    }
 #ifdef USER_PROGRAM
     space = NULL;
     stateRestored = true;

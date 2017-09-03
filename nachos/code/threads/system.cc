@@ -68,7 +68,7 @@ TimerInterruptHandler(int dummy)
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
     // traverse the list and add all to the queue
     while(!listOfSleepNodes->IsEmpty() && listOfSleepNodes->first->key <= stats->totalTicks){
-         ready_threads= (NachOSThread *)listOfSleepNodes->Remove();
+        ready_threads= (NachOSThread *)listOfSleepNodes->Remove();
         scheduler->MoveThreadToReadyQueue(ready_threads);
     }
     (void) interrupt->SetLevel(oldLevel);
@@ -156,7 +156,7 @@ Initialize(int argc, char **argv)
     currentThread = new NachOSThread("main");		
     currentThread->setStatus(RUNNING);
 
-    listOfSleepNodes=  new List;
+    listOfSleepNodes =  new List;
 
     interrupt->Enable();
     CallOnUserAbort(Cleanup);			// if user hits ctl-C

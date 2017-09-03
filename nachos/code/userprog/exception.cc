@@ -193,16 +193,19 @@ ExceptionHandler(ExceptionType which)
         machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
         machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
     } else if ((which == SyscallException) && (type == SysCall_Yield)) {
+
         currentThread->YieldCPU(); // TODO: Check whether to update pc before or after
         machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
         machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
         machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+
     } else if ((which == SyscallException) && (type == SysCall_Sleep)){
+
         unsigned int off = machine->ReadRegister(4);
         NachOSThread *prevThread = currentThread;
         IntStatus oldLevel = interrupt->SetLevel(IntOff);
         unsigned int wakeup_time = (unsigned int) stats->totalTicks + off;
-        listOfSleepNodes->SortedInsert((void *) prevThread, wakeup_time);
+        listOfSleepNodes->SortedInsert((void *) prevThread, wakeup_time); // Look at the list structure in list.h
         currentThread->PutThreadToSleep();
         (void) interrupt->SetLevel(oldLevel);
         machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
