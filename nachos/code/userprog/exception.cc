@@ -208,6 +208,18 @@ ExceptionHandler(ExceptionType which)
         machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
         machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
         machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+    }else if ((which == SyscallException) && (type == SysCall_Fork)){
+        NachOSThread *newThread = new NachOSThread("newThread");
+        new_space = new ProcessAddrSpace();
+        newThread->space = new_space;
+        for(int ptr_for_phy_addr = 0; ptr_for_phy_addr < currentThread->space->numVirtualPages; i++){
+            machine->mainMemory[new_space->KernelPageTable[ptr_for_phy_addr]] = machine->mainMemory[currentThread->space->KernelPageTable[ptr_for_phy_addr]];
+        }
+        
+
+
+
+
     }
     else
     {
