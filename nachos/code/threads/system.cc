@@ -67,7 +67,7 @@ TimerInterruptHandler(int dummy)
 	interrupt->YieldOnReturn();
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
     // traverse the list and add all to the queue
-    while(listOfSleepNodes->first->key <= stats->totalTicks && !listOfSleepNodes->IsEmpty()){
+    while(listOfSleepNodes->first->key <= stats->totalTicks && !listOfSleepNodes->IsEmpty() && listOfSleepNodes->first->key > 0){
          ready_threads= (NachOSThread *)listOfSleepNodes->Remove();
         scheduler->MoveThreadToReadyQueue(ready_threads);
     }

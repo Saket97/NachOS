@@ -184,13 +184,16 @@ List::SortedInsert(void *item, int sortKey)
     if (IsEmpty()) {	// if list is empty, put
         first = element;
         last = element;
-    } else if (sortKey < first->key) {	
+    } else if (sortKey < 0){ //negative sort key for wakeup tiem represents infinity 
+	last->next=element;
+	last=element;
+    } else if (sortKey < first->key || first->key < 0) {	
 		// item goes on front of list
 	element->next = first;
 	first = element;
-    } else {		// look for first elt in list bigger than item
+    } else{		// look for first elt in list bigger than item
         for (ptr = first; ptr->next != NULL; ptr = ptr->next) {
-            if (sortKey < ptr->next->key) {
+            if (sortKey < ptr->next->key || ptr->next->key < 0) {
 		element->next = ptr->next;
 	        ptr->next = element;
 		return;
