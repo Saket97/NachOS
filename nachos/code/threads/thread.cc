@@ -23,12 +23,6 @@
 #define STACK_FENCEPOST 0xdeadbeef	// this is put at the top of the
 					// execution stack, for detecting 
 					// stack overflows
-Log::Log(int id, int exit){
-    threadId=id;
-    exitCode=exit;
-    exitCalled=0;
-    next=NULL;
-}
 //----------------------------------------------------------------------
 // NachOSThread::NachOSThread
 // 	Initialize a thread control block, so that we can then call
@@ -47,7 +41,10 @@ NachOSThread::NachOSThread(char* threadName)
     count++;
     ppid = currentThread->pid;
     addNode(&(currentThread->child), pid);
-    Log *log = new Log(pid,0);
+    Log *log;
+    log->threadId = pid;
+    log->exitCalled = 0;
+    log->exitCode = NULL;
     threadLog->SortedInsert((void *) log, pid);
 #ifdef USER_PROGRAM
     space = NULL;
@@ -182,9 +179,7 @@ NachOSThread::FinishThread ()
 //
 // 	Similar to NachOSThread::PutThreadToSleep(), but a little different.
 //----------------------------------------------------------------------
-void setStatus(ThreadStatus st){
-    status = st;		
-}
+
 void
 NachOSThread::YieldCPU ()
 {
@@ -232,7 +227,7 @@ NachOSThread::PutThreadToSleep ()
     
     DEBUG('t', "Sleeping thread \"%s\"\n", getName());
 
-    setStatus(Blocked);
+    setStatus(BLOCKED);
     while ((nextThread = scheduler->SelectNextReadyThread()) == NULL)
 	interrupt->Idle();	// no one to run, wait for an interrupt
         
