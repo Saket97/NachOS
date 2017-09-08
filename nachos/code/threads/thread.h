@@ -111,12 +111,14 @@ class NachOSThread {
     
     void CheckOverflow();   			// Check if thread has 
 						// overflowed its stack
-    void setStatus(ThreadStatus st);
+    void setStatus(ThreadStatus st){
+    status = st;		
+    }
     char* getName() { return (name); }
     void Print() { printf("%s, ", name); }
   private:
     // some of the private data for this class is listed above
-    static Log* threadLog;		//log of all threads that were once executed 
+    
     int* stack; 	 		// Bottom of the stack 
 					// NULL if this is the main thread
 					// (If NULL, don't deallocate stack)
