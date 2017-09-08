@@ -208,7 +208,58 @@ ExceptionHandler(ExceptionType which)
         machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
         machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
         machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
-    }else if ((which == SyscallException) && (type == SysCall_Fork)){
+    } else if ((which == SyscallException) && (type == SysCall_Exit)){
+	int exitcode = machine->ReadRegister(4);
+	Log *log = (Log *)threadLog->SortedRemove(currentThread->pid);
+        log->exitCode = exitcode;
+	log->exitCalled = 1;
+	threadLog->SortedInsert((void *)log, currentThread->pid)
+	ListElement *ptr = listOfSleepNodes->first;
+	ListElement *prev = listOfSleepNodes->first;
+	IntStatus oldLevel = interrupt->SetLevel(IntOff);
+	while (ptr != NULL){
+		Thread *thread= (Thread *)ptr->item;
+		if(thread->pid == currentThread->ppid && ptr->key < 0){
+			prev->next = ptr->next;
+			delete ptr;
+			scheduler->MoveThreadToReadyQueue(thread);
+			break;
+		}
+		prev = ptr;
+		if(ptr != NULL)
+			ptr = ptr->next;
+	}
+	(void) interrupt->SetLevel(oldLevel);
+    } else if ((which == SyscallException) && (type == SysCall_Join)) {
+	int childPid = machine->ReadRegister(4);
+	int FLAG = 0;
+	node *ptr = currentThread->child;
+	while(ptr != NULL){
+	if(ptr->threadId == childPid){
+		FLAG=1;
+		break;}
+	ptr = ptr->next;
+	}
+	if(FLAG == 0)
+		machine->WriteRegister(2,-1);
+	else{
+	Log *log = (Log *)threadLog->SortedRemove(childPid);
+	threadLog->SortedInsert((void *)log,childPid);
+	if(log->exitCalled != 1){
+		NachOSThread *prevThread = currentThread;
+		IntStatus oldLevel = interrupt->SetLevel(IntOff);
+		listOfSleepNodes->SortedInsert((void *)prevThread, -1);
+		currentThread->PutThreadToSleep();
+		(void) interrupt->SetLevel(oldLevel);
+		log = (Log *)threadLog->SortedRemove(childPid);
+		threadLog->SortedInsert((void *)log,childPid);
+	}
+	machine->WriteRegister(2,log->exitCode);	
+	}
+	machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+    } else if ((which == SyscallException) && (type == SysCall_Fork)){
         NachOSThread *newThread = new NachOSThread("newThread");
         new_space = new ProcessAddrSpace();
         newThread->space = new_space;
