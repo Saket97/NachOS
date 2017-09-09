@@ -91,7 +91,7 @@ ProcessAddressSpace::ProcessAddressSpace(OpenFile *executable)
     KernelPageTable = new TranslationEntry[numVirtualPages];
     for (i = 0; i < numVirtualPages; i++) {
 	KernelPageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	KernelPageTable[i].physicalPage = i;
+	KernelPageTable[i].physicalPage = i; // TODO Siddarth: Exec, increment by offset
 	KernelPageTable[i].valid = TRUE;
 	KernelPageTable[i].use = FALSE;
 	KernelPageTable[i].dirty = FALSE;

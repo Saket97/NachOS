@@ -27,6 +27,7 @@
 #include "console.h"
 #include "synch.h"
 
+extern void LaunchUserProcess(char *file); // Getting external function from progtest.cc
 //----------------------------------------------------------------------
 // ExceptionHandler
 //  Entry point into the Nachos kernel.  Called when a user program
@@ -71,6 +72,7 @@ void func (int arg)
     machine->Run();
     printf("Completed machine run%s\n", currentThread->getName());
 }
+
 static void ConvertIntToHex (unsigned v, Console *console)
 {
    unsigned x;
@@ -265,6 +267,30 @@ ExceptionHandler(ExceptionType which)
         // newThread->userRegisters[PCReg] = currentThread->userRegisters[PCReg];
         // newThread->userRegisters[NextPCReg] = currentThread->userRegisters[NextPCReg];
         newThread->ThreadFork(foo, 0);
+    } else if((which = Syscall_Exception) && (type == SysCall_Exec)){
+        file = machine->ReadRegister(4);
+        OpenFile *executable = fileSystem->Open(file);
+        ProcessAddressSpace *space;
+
+        if(executable == NULL){
+            printf("Error in exec, no file\n");
+            ASSERT(FALSE);
+        }
+
+        space = new ProcessAddressSpace(executable);
+        ProcessAddressSpace::offset = ProcessAddressSpace::offset - space->numVirtualPages;
+        space->setAllParameters(space->numVirtualPages);
+        currentThread->space = space;
+
+        delete executable;
+
+        space->InitUserModeCPURegisters(); // TODO: Check if this is the right thing to do
+        space->RestoreContextOnSwitch();
+
+        machine->Run();
+
+        printf("This should never run\n");
+
     }
     else
     {
