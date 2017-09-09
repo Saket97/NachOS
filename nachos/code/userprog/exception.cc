@@ -268,29 +268,31 @@ ExceptionHandler(ExceptionType which)
         // newThread->userRegisters[NextPCReg] = currentThread->userRegisters[NextPCReg];
         newThread->ThreadFork(foo, 0);
     } else if((which = Syscall_Exception) && (type == SysCall_Exec)){
-        file = machine->ReadRegister(4);
-        OpenFile *executable = fileSystem->Open(file);
-        ProcessAddressSpace *space;
-
-        if(executable == NULL){
-            printf("Error in exec, no file\n");
-            ASSERT(FALSE);
+        char *filename;
+        vaddr = machine->ReadRegister(4);
+        int i = 0;
+        machine->ReadMem(vaddr, 1, &memval);
+        while ((*(char*)&memval) != '\0') {
+            filename[i] = *(char *)&memval;
+            i++;
+            vaddr++;
+            machine->ReadMem(vaddr, 1, &memval);
         }
+        filename[i] = *(char *)&memval;
 
+        OpenFile *executable = fileSystem->Open(filename);
+        ProcessAddressSpace *space, *oldspace;
         space = new ProcessAddressSpace(executable);
-        ProcessAddressSpace::offset = ProcessAddressSpace::offset - space->numVirtualPages;
-        space->setAllParameters(space->numVirtualPages);
+        oldspace = currentThread->space;
         currentThread->space = space;
-
+        if(oldspace != NULL)
+            delete oldspace;
         delete executable;
-
-        space->InitUserModeCPURegisters(); // TODO: Check if this is the right thing to do
+        space->InitUserModeCPURegisters();
         space->RestoreContextOnSwitch();
+        // no need to update PCReg
 
         machine->Run();
-
-        printf("This should never run\n");
-
     }
     else
     {
