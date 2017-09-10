@@ -232,11 +232,11 @@ ExceptionHandler(ExceptionType which)
         machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
     } else if ((which == SyscallException) && (type == SysCall_Exit)){
 	    int exitcode = machine->ReadRegister(4);
-	    Log *log = (Log *)threadLog->SortedRemove(&(currentThread->pid));
+	    Log *log = (Log *)threadLog->PidElement((currentThread->pid));
         if (log != NULL){
             log->exitCode = exitcode;
 	        log->exitCalled = 1;
-	        threadLog->SortedInsert((void *)log, currentThread->pid);
+	        //threadLog->SortedInsert((void *)log, currentThread->pid);
 	        ListElement *ptr = listOfSleepNodes->first;
 	        ListElement *prev = listOfSleepNodes->first;
 	        IntStatus oldLevel = interrupt->SetLevel(IntOff);
@@ -272,16 +272,16 @@ ExceptionHandler(ExceptionType which)
 	    if(FLAG == 0)
 	    	machine->WriteRegister(2,-1);
 	    else{
-	        Log *log = (Log *)threadLog->SortedRemove(&childPid);
-	        threadLog->SortedInsert((void *)log,childPid);
+	        Log *log = (Log *)threadLog->PidElement(childPid);
+	        //threadLog->SortedInsert((void *)log,childPid);
 	        if(log->exitCalled != 1){
 	        	NachOSThread *prevThread = currentThread;
 	        	IntStatus oldLevel = interrupt->SetLevel(IntOff);
 	        	listOfSleepNodes->SortedInsert((void *)prevThread, -1);
 	        	currentThread->PutThreadToSleep();
 	        	(void) interrupt->SetLevel(oldLevel);
-	        	log = (Log *)threadLog->SortedRemove(&childPid);
-	        	threadLog->SortedInsert((void *)log,childPid);
+	        	log = (Log *)threadLog->PidElement(childPid);
+	        	//threadLog->SortedInsert((void *)log,childPid);
 	        }
 	        machine->WriteRegister(2,log->exitCode);	
 	    }
