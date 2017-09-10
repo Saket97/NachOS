@@ -39,6 +39,7 @@ Machine::Run()
     for (;;) {
     	//printf("INSTR %x\n",*instr);
         OneInstruction(instr);
+        currentThread->incNumInstr();
 	interrupt->OneTick();
 	if (singleStep && (runUntilTime <= stats->totalTicks))
 	  Debugger();

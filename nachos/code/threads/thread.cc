@@ -39,6 +39,7 @@ NachOSThread::NachOSThread(char* threadName)
     status = JUST_CREATED;
     pid = count;
     count++;
+    numInstr = 0;
     if (currentThread != NULL){
         ppid = currentThread->pid;
         addNode(&(currentThread->child), pid);
